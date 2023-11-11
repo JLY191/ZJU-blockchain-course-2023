@@ -6,6 +6,9 @@ async function main() {
   await borrowYourCar.deployed();
 
   console.log(`BorrowYourCar deployed to ${borrowYourCar.address}`);
+
+  const erc20 = await borrowYourCar.borrowPay();
+  console.log(`ERC20 deployed to ${erc20}`);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

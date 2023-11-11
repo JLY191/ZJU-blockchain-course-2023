@@ -1,67 +1,128 @@
-# ZJU-blockchain-course-2023
-
-⬆ 可以️修改成你自己的项目名。
-
-> 第二次作业要求（以下内容提交时可以删除）：
-> 
-> 简易汽车借用系统，参与方包括：汽车拥有者，有借用汽车需求的用户
->
-> 背景：ERC-4907 基于 ERC-721 做了简单的优化和补充，允许用户对NFT进行租借。
-> - 创建一个合约，在合约中发行NFT集合，每个NFT代表一辆汽车。给部分用户测试领取部分汽车NFT，用于后面的测试。
-> - 在网站中，默认每个用户的汽车都可以被借用。每个用户可以： 
->    1. 查看自己拥有的汽车列表。查看当前还没有被借用的汽车列表。
->    2. 查询一辆汽车的主人，以及该汽车当前的借用者（如果有）。
->    3. 选择并借用某辆还没有被借用的汽车一定时间。
->    4. 上述过程中借用不需要进行付费。
-> 
-> - （Bonus）使用自己发行的积分（ERC20）完成付费租赁汽车的流程
-> - 请大家专注于功能实现，网站UI美观程度不纳入评分标准，但要让用户能够舒适操作。简便起见，可以在网上找图片代表不同汽车，不需要将图片在链上进行存储。
-
-**以下内容为作业仓库的README.md中需要描述的内容。请根据自己的需要进行修改并提交。**
-
-作业提交方式为：**提交视频文件**和**仓库的链接**到指定邮箱。
+# ZJU-blockchain-course-2023-BorrowYourCar
 
 ## 如何运行
-
-补充如何完整运行你的应用。
 
 1. 在本地启动ganache应用。
 
 2. 在 `./contracts` 中安装需要的依赖，运行如下的命令：
     ```bash
-    npm install
+    $ npm install
     ```
+
 3. 在 `./contracts` 中编译合约，运行如下的命令：
     ```bash
-    npx hardhat compile
+    $ npx hardhat compile
     ```
-4. ...
-5. ...
-6. 在 `./frontend` 中安装需要的依赖，运行如下的命令：
+
+4. 在 `./contracts` 中部署，在`./contracts/hardhat.config.ts`中粘贴上ganache用户的私钥：
+
+    ![](./images/pk.png)
+
+    然后运行如下的命令：
+
     ```bash
-    npm install
+    $ npx hardhat run ./scripts/deploy.ts --network ganache
     ```
-7. 在 `./frontend` 中启动前端程序，运行如下的命令：
+
+    获取到部署的两个合约地址：
+
+    ![](./images/add.png)
+
+    在前端的`frontend/src/utils/contract-addresses.json`位置粘贴上这两个地址：
+
+    ![](./images/frtadd.png)
+
+    在前端` frontend/src/pages/erc/index.tsx`第215行的approve函数粘贴上面的`BYC`地址：
+
+    ![](./images/approve.png)
+
+    最后记得把ABI复制到`frontend/src/utils/abis`。
+
+5. 在 `./frontend` 中安装需要的依赖，运行如下的命令：
     ```bash
-    npm run start
+    $ npm install
+    ```
+
+6. 在 `./frontend` 中启动前端程序，运行如下的命令：
+    ```bash
+    $ npm start
     ```
 
 ## 功能实现分析
 
-简单描述：项目完成了要求的哪些功能？每个功能具体是如何实现的？
-
-建议分点列出。
+1. 分发ERC20 Token作为借车时消耗的代币。当A用户向B用户借车时，A将与借车时间相关的ERC20 Token转给B，然后区块链上的车的信息得到记录。
+2. 通过区块链上某用户私钥，部署合约，得到两个合约部署的公钥。
+3. 部署后，初始化ERC721合约，初始化ERC20的实例，初始化链上的车辆数、车辆数组等状态量，其他函数可以调用。
+4. 领取车辆：用户向ERC721对应账户发送请求，智能合约中的mint被调用，创建车信息，用户付ETH。
+5. 获取空闲车、用户车辆：用户支付ETH，前端调用智能合约ABI请求链中车的信息。
+6. 借车：A用户向B用户借车，A用户不仅支付ETH，还要将一定数量的ERC20 Token转账给B用户。
 
 ## 项目运行截图
 
-放一些项目运行截图。
+部署成功示例，用hash = 0的用户创建合约：
 
-项目运行成功的关键页面和流程截图。主要包括操作流程以及和区块链交互的截图。
+![](./images/dep.png)
+
+连接新用户：
+
+<img src="./images/con1.png" style="zoom:50%;" />
+
+<img src="./images/con2.png" style="zoom:50%;" />
+
+领取ERC20积分（点完按钮记得刷新）：
+
+<img src="./images/get1.png" style="zoom: 25%;" />
+
+<img src="./images/get2.png" style="zoom:50%;" />
+
+<img src="./images/get3.png" style="zoom:50%;" />
+
+领取车辆+查看用户车辆：
+
+<img src="./images/gc1.png" style="zoom:25%;" />
+
+<img src="./images/gc2.png" style="zoom:50%;" />
+
+<img src="./images/gc3.png" style="zoom:50%;" />
+
+查看空闲车辆：
+
+<img src="./images/free1.png" style="zoom:50%;" />
+
+查询车，合法车token和不合法：
+
+<img src="./images/srch1.png" style="zoom:50%;" />
+
+<img src="./images/srch2.png" style="zoom:50%;" />
+
+借车，发现车从空闲列表消失，两个人Token变化。
+
+借车前，被借用户：
+
+<img src="./images/b1.png" style="zoom:50%;" />
+
+借车用户：
+
+<img src="./images/b2.png" style="zoom:50%;" />
+
+借车先approve：
+
+<img src="./images/b3.png" style="zoom:25%;" />
+
+成功借车：
+
+<img src="./images/b4.png" style="zoom:50%;" />
+
+借车后，借车用户：
+
+<img src="./images/b5.png" style="zoom:50%;" />
+
+借车后，被借用户：
+
+<img src="./images/b6.png" style="zoom:50%;" />
 
 ## 参考内容
 
 - 课程的参考Demo见：[DEMOs](https://github.com/LBruyne/blockchain-course-demos)。
 
 - ERC-4907 [参考实现](https://eips.ethereum.org/EIPS/eip-4907)
-
-如果有其它参考的内容，也请在这里陈列。
